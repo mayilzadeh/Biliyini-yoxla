@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Viktorina</title>
+<meta name="theme-color" content="#1b1464">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Viktorina">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){});});}</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<style>
+:root{--bg:#1b1464;--bg2:#120d45;--card:#262089;--line:#3a33b5;--ink:#f5f3ff;--mute:#aaa6e6;--sun:#ffd23f;--ok:#2ee6a6;--bad:#ff5c7a;--r:18px}
+*{box-sizing:border-box;margin:0}
+html,body{min-height:100%}
+body{font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;color:var(--ink);background:radial-gradient(1200px 600px at 80% -10%,#3b2fd0 0,transparent 60%),radial-gradient(900px 500px at -10% 110%,#7a1fa2 0,transparent 55%),var(--bg2);display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
+main{width:100%;max-width:720px;display:flex;flex-direction:column;justify-content:center}
+section{display:none}section.on{display:block}
+button{font:inherit;color:inherit;cursor:pointer;border:0}
+:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+h1{font-size:clamp(2.6rem,9vw,4.6rem);line-height:.95;letter-spacing:-.03em;font-weight:900}
+h1 span{display:block;color:var(--sun);transform:rotate(-2deg);transform-origin:left;margin-top:6px}
+.lead{color:var(--mute);margin:18px 0 26px;font-size:1.1rem;max-width:44ch;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:26px}
+.chip{padding:10px 18px;border-radius:99px;background:var(--card);border:2px solid var(--line);font-weight:700}
+.chips.sub{margin:-12px 0 22px}.chips.sub .chip{padding:7px 14px;font-size:.9rem}
+.chip[aria-pressed=true]{background:var(--sun);color:#2a1f00;border-color:var(--sun)}
+.big{background:var(--sun);color:#2a1f00;font-weight:900;font-size:1.25rem;padding:16px 34px;border-radius:var(--r);box-shadow:0 6px 0 #c99a00;transition:transform .1s,box-shadow .1s}
+.big:active{transform:translateY(5px);box-shadow:0 1px 0 #c99a00}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;margin-top:22px;color:var(--mute);font-size:.95rem}
+.link{background:none;color:var(--mute);text-decoration:underline;padding:4px}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;font-weight:700}
+.pill{background:var(--card);border:2px solid var(--line);border-radius:99px;padding:6px 14px;font-size:.95rem}
+.streak{color:var(--sun);opacity:0;transition:opacity .2s}.streak.on{opacity:1}
+.bar{height:12px;background:var(--bg);border-radius:99px;overflow:hidden;border:2px solid var(--line);margin-bottom:22px}
+.bar i{display:block;height:100%;width:100%;background:var(--ok);border-radius:99px;transition:width .1s linear,background .3s}
+.bar.low i{background:var(--bad)}
+.cat{color:var(--mute);margin-bottom:8px}
+.q{font-size:clamp(1.5rem,5vw,2.2rem);line-height:1.2;font-weight:800;margin-bottom:24px;min-height:2.4em}
+.opts{display:grid;gap:12px}
+.opt{display:flex;align-items:center;gap:14px;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:var(--r);padding:14px 16px;font-size:1.1rem;font-weight:700;transition:transform .1s,background .2s,border-color .2s}
+.opt b{flex:none;width:34px;height:34px;border-radius:10px;background:var(--bg);display:grid;place-items:center;color:var(--sun)}
+.opt:not(:disabled):hover{transform:translateX(4px);border-color:var(--sun)}
+.opt.ok{background:#0c6b50;border-color:var(--ok)}.opt.bad{background:#7a1630;border-color:var(--bad);animation:shake .35s}
+.opt.gone{opacity:.15}
+.opt:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:20px;min-height:52px}
+.help{background:var(--card);border:2px dashed var(--line);border-radius:12px;padding:10px 16px;font-weight:700}
+.help:disabled{opacity:.35}
+.next{background:var(--sun);color:#2a1f00;font-weight:900;border-radius:12px;padding:12px 26px;display:none}
+.next.on{display:block}
+.score{font-size:clamp(4rem,16vw,7rem);font-weight:900;line-height:1;color:var(--sun)}
+.score small{font-size:.4em;color:var(--mute)}
+.msg{font-size:1.4rem;font-weight:800;margin:6px 0 4px}
+.review{margin:22px 0;display:grid;gap:8px;max-height:260px;overflow:auto;padding-right:4px}
+.rv{background:var(--card);border-radius:12px;padding:10px 14px;font-size:.95rem;border-left:6px solid var(--ok)}
+.rv.x{border-color:var(--bad)}.rv em{display:block;color:var(--mute);font-style:normal;margin-top:2px}
+.err{background:#7a1630;padding:12px 16px;border-radius:12px;margin-top:16px;display:none}
+.conf{position:fixed;top:-30px;font-size:26px;pointer-events:none;animation:fall 2.6s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <section id="start" class="on">
+    <h1>Biliyini yoxla<span>10 sual, 20 saniyə</span></h1>
+    <p class="lead">Mövzu seç, suallara tez cavab ver. Nə qədər tez cavab versən, o qədər çox xal qazanırsan. Ardıcıl düzgün cavablar bonus gətirir.</p>
+    <div class="chips" id="chips" role="group" aria-label="Mövzu"></div>
+    <div class="chips sub" id="subs" role="group" aria-label="Alt mövzu" style="display:none"></div>
+    <button class="big" id="go">Oyuna başla</button>
+    <div class="meta"><span id="best">Rekord: 0</span><span id="cnt"></span><button class="link" id="snd">Səs: açıq</button><button class="link" id="reset">Görülən sualları sıfırla</button></div>
+    <div class="err" id="err"></div>
+  </section>
+
+  <section id="game">
+    <div class="hud">
+      <span class="pill" id="prog">1 / 10</span>
+      <span class="streak" id="streak">🔥 3 ardıcıl</span>
+      <span class="pill" id="score">0 xal</span>
+    </div>
+    <div class="bar" id="bar"><i></i></div>
+    <div class="cat" id="cat"></div>
+    <div class="q" id="q"></div>
+    <div class="opts" id="opts"></div>
+    <div class="foot">
+      <button class="help" id="fifty">50/50</button>
+      <button class="link" id="quit">Oyunu bitir</button>
+      <button class="next" id="next">Növbəti sual</button>
+    </div>
+  </section>
+
+  <section id="end">
+    <div class="msg" id="msg"></div>
+    <div class="score"><span id="fs">0</span> <small>xal</small></div>
+    <p class="lead" id="sum"></p>
+    <div class="review" id="review"></div>
+    <button class="big" id="again">Yenidən oyna</button>
+  </section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const TIME = 20;
+let quiz = [], i = 0, score = 0, streak = 0, results = [], left = TIME, tick, locked = false, usedFifty = false, cat = "", sound = true, correctCount = 0;
+
+const show = id => document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === id));
+const api = async (url, opts) => { const r = await fetch(url, opts); if (!r.ok) throw new Error(r.status); return r.json(); };
+const best = () => +(localStorage.getItem("quizBest") || 0);
+
+function beep(f, d = .12, type = "sine") {
+  if (!sound) return;
+  try {
+    const a = beep.ctx ||= new AudioContext(), o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.value = f; g.gain.value = .08;
+    o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + d);
+  } catch (e) {}
+}
+
+async function init() {
+  $("#best").textContent = "Rekord: " + best();
+  api("/api/count").then(n => $("#cnt").textContent = "Bankda " + n + " sual").catch(() => {});
+  try {
+    const cats = await api("/api/categories");
+    const groups = {};
+    cats.forEach(c => { const [g, s] = c.split("/"); (groups[g] ||= []); if (s) groups[g].push(s); });
+    const mk = (box, label, value, onPick) => {
+      const b = document.createElement("button");
+      b.className = "chip"; b.textContent = label;
+      b.setAttribute("aria-pressed", false);
+      b.onclick = () => { cat = value; box.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", x === b)); if (onPick) onPick(); };
+      box.append(b); return b;
+    };
+    const box = $("#chips"), subs = $("#subs");
+    mk(box, "Hamısı", "", () => { subs.style.display = "none"; }).setAttribute("aria-pressed", true);
+    Object.keys(groups).forEach(g => mk(box, g, g, () => {
+      subs.innerHTML = "";
+      if (!groups[g].length) { subs.style.display = "none"; return; }
+      subs.style.display = "flex";
+      mk(subs, "Hamısı", g).setAttribute("aria-pressed", true);
+      groups[g].forEach(s => mk(subs, s, g + "/" + s));
+    }));
+  } catch (e) { fail(); }
+}
+
+function fail() {
+  const e = $("#err");
+  e.style.display = "block";
+  e.textContent = "Serverə qoşulmaq alınmadı. Proqramın (QuizWebApplication) işlədiyini yoxla və səhifəni yenilə.";
+}
+
+async function start() {
+  try {
+    const seen = JSON.parse(localStorage.getItem("quizSeen") || "[]");
+    quiz = await api("/api/quiz?count=10&category=" + encodeURIComponent(cat) + "&seen=" + seen.join(","));
+  } catch (e) { return fail(); }
+  i = 0; score = 0; streak = 0; results = []; correctCount = 0; usedFifty = false;
+  $("#score").textContent = "0 xal";
+  show("game"); showQ();
+}
+
+function markSeen(id) {
+  const seen = JSON.parse(localStorage.getItem("quizSeen") || "[]");
+  if (!seen.includes(id)) { seen.push(id); localStorage.setItem("quizSeen", JSON.stringify(seen)); }
+}
+
+function showQ() {
+  const q = quiz[i];
+  locked = false;
+  markSeen(q.id);
+  $("#prog").textContent = (i + 1) + " / " + quiz.length;
+  $("#cat").textContent = q.category.replace("/", " / ");
+  $("#q").textContent = q.text;
+  $("#streak").classList.toggle("on", streak >= 2);
+  $("#streak").textContent = "🔥 " + streak + " ardıcıl";
+  $("#next").classList.remove("on");
+  $("#fifty").disabled = usedFifty;
+  const box = $("#opts"); box.innerHTML = "";
+  q.options.forEach((t, n) => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.innerHTML = "<b>" + (n + 1) + "</b><span></span>";
+    b.lastChild.textContent = t;
+    b.onclick = () => pick(t, b);
+    box.append(b);
+  });
+  left = TIME; clearInterval(tick);
+  $("#bar").classList.remove("low");
+  tick = setInterval(() => {
+    left -= .1;
+    $("#bar i").style.width = Math.max(0, left / TIME * 100) + "%";
+    $("#bar").classList.toggle("low", left <= 5);
+    if (left <= 0) pick("", null);
+  }, 100);
+}
+
+async function pick(answer, btn) {
+  if (locked) return;
+  locked = true; clearInterval(tick);
+  let r;
+  try { r = await api("/api/check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: quiz[i].id, answer }) }); }
+  catch (e) { locked = false; return fail(); }
+  const opts = [...document.querySelectorAll(".opt")];
+  opts.forEach(o => { o.disabled = true; if (o.lastChild.textContent === r.correctAnswer) o.classList.add("ok"); });
+  if (r.correct) {
+    streak++; correctCount++;
+    score += 100 + Math.round(left) * 5 + (streak >= 3 ? 50 : 0);
+    beep(660); setTimeout(() => beep(880), 90);
+  } else {
+    streak = 0; if (btn) btn.classList.add("bad");
+    beep(180, .25, "sawtooth");
+  }
+  $("#score").textContent = score + " xal";
+  $("#streak").classList.toggle("on", streak >= 2);
+  $("#streak").textContent = "🔥 " + streak + " ardıcıl";
+  results.push({ text: quiz[i].text, chosen: answer || "(vaxt bitdi)", correct: r.correctAnswer, ok: r.correct });
+  $("#next").textContent = i + 1 < quiz.length ? "Növbəti sual" : "Nəticəyə bax";
+  $("#next").classList.add("on"); $("#next").focus();
+}
+
+async function useFifty() {
+  if (locked || usedFifty) return;
+  usedFifty = true; $("#fifty").disabled = true;
+  try {
+    const hide = await api("/api/fifty/" + quiz[i].id);
+    document.querySelectorAll(".opt").forEach(o => { if (hide.includes(o.lastChild.textContent)) { o.classList.add("gone"); o.disabled = true; } });
+  } catch (e) { usedFifty = false; $("#fifty").disabled = false; }
+}
+
+function next() { i++; i < quiz.length ? showQ() : finish(); }
+
+function finish() {
+  const n = results.length, pct = correctCount / n;
+  const record = score > best();
+  if (record) localStorage.setItem("quizBest", score);
+  $("#best").textContent = "Rekord: " + best();
+  $("#fs").textContent = score;
+  $("#msg").textContent = pct >= .9 ? "Əla, sən bilik ustasısan!" : pct >= .7 ? "Yaxşı nəticədir!" : pct >= .5 ? "Pis deyil, bir az da çalış." : "Yenidən cəhd et, alınacaq!";
+  $("#sum").textContent = n + " sualdan " + correctCount + " düzgün cavab." + (record ? " Yeni rekord!" : " Rekord: " + best() + " xal.");
+  const rv = $("#review"); rv.innerHTML = "";
+  results.forEach(r => {
+    const d = document.createElement("div");
+    d.className = "rv" + (r.ok ? "" : " x");
+    const t = document.createElement("div"); t.textContent = r.text;
+    const e = document.createElement("em");
+    e.textContent = r.ok ? "Düzgün: " + r.correct : "Sənin cavabın: " + r.chosen + ". Düzgün: " + r.correct;
+    d.append(t, e); rv.append(d);
+  });
+  show("end");
+  if (pct >= .7 && !matchMedia("(prefers-reduced-motion:reduce)").matches) confetti();
+  beep(523); setTimeout(() => beep(659), 120); setTimeout(() => beep(784), 240);
+}
+
+function confetti() {
+  const em = ["🎉", "⭐", "✨", "🎊"];
+  for (let k = 0; k < 36; k++) {
+    const s = document.createElement("span");
+    s.className = "conf"; s.textContent = em[k % 4];
+    s.style.left = Math.random() * 100 + "vw";
+    s.style.animationDelay = Math.random() * .8 + "s";
+    document.body.append(s); setTimeout(() => s.remove(), 3600);
+  }
+}
+
+$("#go").onclick = start;
+$("#again").onclick = () => show("start");
+$("#next").onclick = next;
+$("#quit").onclick = () => {
+  if (locked && !$("#next").classList.contains("on")) return;
+  clearInterval(tick);
+  results.length ? finish() : show("start");
+};
+$("#fifty").onclick = useFifty;
+$("#snd").onclick = () => { sound = !sound; $("#snd").textContent = "Səs: " + (sound ? "açıq" : "bağlı"); };
+document.addEventListener("keydown", e => {
+  if (!$("#game").classList.contains("on")) return;
+  if (/^[1-4]$/.test(e.key) && !locked) { const o = document.querySelectorAll(".opt")[+e.key - 1]; if (o && !o.disabled) o.click(); }
+  else if (e.key === "Enter" && $("#next").classList.contains("on")) next();
+});
+$("#reset").onclick = () => { localStorage.removeItem("quizSeen"); $("#reset").textContent = "Sıfırlandı"; };
+init();
+</script>
+</body>
+</html>
